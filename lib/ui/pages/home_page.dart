@@ -20,8 +20,9 @@ class HomePage extends StatelessWidget {
             Text(
               'Restaurant',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.bold),
+                color: Theme.of(context).colorScheme.secondary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               'Recommendation restaurant for you!',
@@ -29,7 +30,7 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
-        toolbarHeight: 80,
+        toolbarHeight: 100,
         actions: [
           IconButton(
             icon: const Icon(Icons.search, size: 28),
@@ -61,25 +62,46 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                     Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
-                     const SizedBox(height: 16),
-                     Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey),
-                     ),
-                     const SizedBox(height: 16),
-                     ElevatedButton(
+                    Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.secondary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSecondary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       onPressed: () {
-                          state.refresh(); 
+                        Provider.of<RestaurantListProvider>(
+                          context,
+                          listen: false,
+                        ).refresh();
                       },
-                      child: const Text('Try Again')
-                  )
-                ],
-              ),
+                      child: const Text('Try Again'),
+                    ),
+                  ],
+                ),
               ),
             );
           } else {

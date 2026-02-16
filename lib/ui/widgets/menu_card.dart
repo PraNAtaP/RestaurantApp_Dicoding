@@ -3,7 +3,7 @@ import '../../data/models/restaurant_model.dart';
 
 class MenuCard extends StatelessWidget {
   final Category menu;
-  final String type; // 'food' or 'drink' to maybe vary icons or placeholders if needed
+  final String type;
 
   const MenuCard({super.key, required this.menu, required this.type});
 
@@ -11,11 +11,11 @@ class MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -26,20 +26,28 @@ class MenuCard extends StatelessWidget {
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               child: Image.network(
-                // Placeholder image since API doesn't provide one
-                type == 'food' 
-                    ? 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png' 
+                type == 'food'
+                    ? 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'
                     : 'https://cdn-icons-png.flaticon.com/512/2405/2405597.png',
-                fit: BoxFit.contain, // Fit contain for icon placeholders
+                fit: BoxFit.contain,
                 width: double.infinity,
                 errorBuilder: (ctx, error, stack) => const Center(
                   child: Icon(Icons.fastfood, color: Colors.grey, size: 40),
                 ),
                 loadingBuilder: (context, child, loadingProgress) {
-                   if (loadingProgress == null) return child;
-                   return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,));
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
                 },
               ),
             ),
@@ -51,18 +59,20 @@ class MenuCard extends StatelessWidget {
               children: [
                 Text(
                   menu.name,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "IDR 15.000", // Fixed price as requested
+                  "IDR 15.000",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ],
             ),

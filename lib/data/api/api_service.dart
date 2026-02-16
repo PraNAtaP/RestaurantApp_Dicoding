@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/restaurant_model.dart';
@@ -36,7 +35,11 @@ class ApiService {
     }
   }
 
-  Future<CustomerReview> postReview(String id, String name, String review) async {
+  Future<CustomerReview> postReview(
+    String id,
+    String name,
+    String review,
+  ) async {
     final response = await http.post(
       Uri.parse("$_baseUrl/review"),
       headers: {'Content-Type': 'application/json'},
@@ -44,11 +47,11 @@ class ApiService {
     );
 
     if (response.statusCode == 201 || response.statusCode == 200) {
-       // Return a dummy object for now as we just need to know it succeeded, or parse if Model allows. 
-       // Keeping it simple as per original code's intent but fixing the potential missing return if I were strict.
-       // Actually, let's just return the input data to satisfy the Future<CustomerReview> signature
-       // without parsing the complex response which might include the whole list.
-       return CustomerReview(name: name, review: review, date: DateTime.now().toString()); 
+      return CustomerReview(
+        name: name,
+        review: review,
+        date: DateTime.now().toString(),
+      );
     } else {
       throw Exception('Failed to post review');
     }

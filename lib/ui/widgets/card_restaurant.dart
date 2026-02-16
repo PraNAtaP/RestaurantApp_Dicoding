@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../data/models/restaurant_model.dart';
-import '../../styles/styles.dart';
 import '../pages/detail_page.dart';
 
 class CardRestaurant extends StatelessWidget {
@@ -11,13 +10,13 @@ class CardRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16, top: 8), // Added bottom margin
+      margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             offset: const Offset(0, 4),
             blurRadius: 10,
           ),
@@ -29,8 +28,11 @@ class CardRestaurant extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            Navigator.pushNamed(context, DetailPage.routeName,
-                arguments: restaurant);
+            Navigator.pushNamed(
+              context,
+              DetailPage.routeName,
+              arguments: restaurant,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -45,7 +47,7 @@ class CardRestaurant extends StatelessWidget {
                       width: 100,
                       height: 80,
                       child: Image.network(
-                        "https://restaurant-api.dicoding.dev/images/small/${restaurant.pictureId}",
+                        "https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}",
                         fit: BoxFit.cover,
                         errorBuilder: (ctx, error, stackTrace) =>
                             const Center(child: Icon(Icons.error)),
@@ -61,9 +63,9 @@ class CardRestaurant extends StatelessWidget {
                       Text(
                         restaurant.name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -79,11 +81,12 @@ class CardRestaurant extends StatelessWidget {
                           Expanded(
                             child: Text(
                               restaurant.city,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: Colors.grey[600],
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.6),
                                   ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -102,10 +105,8 @@ class CardRestaurant extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             "${restaurant.rating}",
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),

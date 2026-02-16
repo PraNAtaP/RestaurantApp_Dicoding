@@ -1,7 +1,3 @@
-
-import 'dart:convert';
-
-// List Response
 class RestaurantListResponse {
   final bool error;
   final String message;
@@ -21,11 +17,11 @@ class RestaurantListResponse {
         message: json["message"],
         count: json["count"],
         restaurants: List<Restaurant>.from(
-            json["restaurants"].map((x) => Restaurant.fromJson(x))),
+          json["restaurants"].map((x) => Restaurant.fromJson(x)),
+        ),
       );
 }
 
-// Detail Response
 class RestaurantDetailResponse {
   final bool error;
   final String message;
@@ -45,7 +41,6 @@ class RestaurantDetailResponse {
       );
 }
 
-// Search Response
 class RestaurantSearchResponse {
   final bool error;
   final int founded;
@@ -62,11 +57,11 @@ class RestaurantSearchResponse {
         error: json["error"],
         founded: json["founded"],
         restaurants: List<Restaurant>.from(
-            json["restaurants"].map((x) => Restaurant.fromJson(x))),
+          json["restaurants"].map((x) => Restaurant.fromJson(x)),
+        ),
       );
 }
 
-// Basic Restaurant Object (for List and Search)
 class Restaurant {
   final String id;
   final String name;
@@ -85,16 +80,15 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        pictureId: json["pictureId"],
-        city: json["city"],
-        rating: json["rating"]?.toDouble(),
-      );
+    id: json["id"],
+    name: json["name"],
+    description: json["description"],
+    pictureId: json["pictureId"],
+    city: json["city"],
+    rating: json["rating"]?.toDouble(),
+  );
 }
 
-// Detailed Restaurant Object
 class RestaurantDetail {
   final String id;
   final String name;
@@ -129,11 +123,13 @@ class RestaurantDetail {
         address: json["address"],
         pictureId: json["pictureId"],
         categories: List<Category>.from(
-            json["categories"].map((x) => Category.fromJson(x))),
+          json["categories"].map((x) => Category.fromJson(x)),
+        ),
         menus: Menus.fromJson(json["menus"]),
         rating: json["rating"]?.toDouble(),
         customerReviews: List<CustomerReview>.from(
-            json["customerReviews"].map((x) => CustomerReview.fromJson(x))),
+          json["customerReviews"].map((x) => CustomerReview.fromJson(x)),
+        ),
       );
 }
 
@@ -142,26 +138,22 @@ class Category {
 
   Category({required this.name});
 
-  factory Category.fromJson(Map<String, dynamic> json) => Category(
-        name: json["name"],
-      );
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      Category(name: json["name"]);
 }
 
 class Menus {
   final List<Category> foods;
   final List<Category> drinks;
 
-  Menus({
-    required this.foods,
-    required this.drinks,
-  });
+  Menus({required this.foods, required this.drinks});
 
   factory Menus.fromJson(Map<String, dynamic> json) => Menus(
-        foods: List<Category>.from(
-            json["foods"].map((x) => Category.fromJson(x))),
-        drinks: List<Category>.from(
-            json["drinks"].map((x) => Category.fromJson(x))),
-      );
+    foods: List<Category>.from(json["foods"].map((x) => Category.fromJson(x))),
+    drinks: List<Category>.from(
+      json["drinks"].map((x) => Category.fromJson(x)),
+    ),
+  );
 }
 
 class CustomerReview {
@@ -176,8 +168,8 @@ class CustomerReview {
   });
 
   factory CustomerReview.fromJson(Map<String, dynamic> json) => CustomerReview(
-        name: json["name"],
-        review: json["review"],
-        date: json["date"],
-      );
+    name: json["name"],
+    review: json["review"],
+    date: json["date"],
+  );
 }

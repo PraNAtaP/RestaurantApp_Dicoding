@@ -13,7 +13,10 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Search',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: Column(
         children: [
@@ -22,18 +25,36 @@ class SearchPage extends StatelessWidget {
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search Restaurant...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none
+                  borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey[200],
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16)
+                fillColor:
+                    Theme.of(context).cardTheme.color ??
+                    Theme.of(context).colorScheme.surface,
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 16,
+                ),
               ),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               onChanged: (query) {
-                Provider.of<RestaurantSearchProvider>(context, listen: false)
-                    .searchRestaurant(query);
+                Provider.of<RestaurantSearchProvider>(
+                  context,
+                  listen: false,
+                ).searchRestaurant(query);
               },
             ),
           ),
@@ -53,23 +74,51 @@ class SearchPage extends StatelessWidget {
                     },
                   );
                 } else if (state.state is ErrorState) {
-                   if (state.message.isEmpty) return Container();
-                   return Center(child: Column(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       Icon(Icons.search_off, size: 60, color: Colors.grey[400]),
-                       const SizedBox(height: 16),
-                       Text(state.message, style: const TextStyle(color: Colors.grey)),
-                     ],
-                   ));
+                  if (state.message.isEmpty) return Container();
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 60,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.message,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 } else {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.restaurant_menu, size: 80, color: Colors.grey[300]),
+                        Icon(
+                          Icons.restaurant_menu,
+                          size: 80,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.2),
+                        ),
                         const SizedBox(height: 16),
-                        const Text('Find your favorite restaurant', style: TextStyle(color: Colors.grey)),
+                        Text(
+                          'Find your favorite restaurant',
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
                       ],
                     ),
                   );

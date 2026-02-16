@@ -1,7 +1,10 @@
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/api/api_service.dart';
 import '../data/models/restaurant_model.dart';
 import '../data/models/result_state.dart';
+import '../utils/date_helper.dart';
 
 class RestaurantListProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -16,27 +19,33 @@ class RestaurantListProvider extends ChangeNotifier {
   String _message = '';
   String get message => _message;
 
-  Future<dynamic> _fetchAllRestaurant() async {
+  Future<void> _fetchAllRestaurant() async {
     try {
       _state = Loading();
       notifyListeners();
       final restaurant = await apiService.getRestaurantList();
       if (restaurant.restaurants.isEmpty) {
-        _state = ErrorState('No Data');
+        _state = NoData('No Data');
         notifyListeners();
-        return _message = 'Empty Data';
+        _message = 'Empty Data';
       } else {
         _state = HasData(restaurant);
         notifyListeners();
-        return _message = 'Data Loaded';
+        _message = 'Data Loaded';
       }
-    } catch (e) {
-      _state = ErrorState('Error --> $e');
+    } on SocketException {
+      _state = ErrorState(
+        'No Internet Connection. Please check your connection.',
+      );
       notifyListeners();
-      return _message = 'Error --> $e';
+      _message = 'No Internet Connection';
+    } catch (e) {
+      _state = ErrorState('Failed to load data. Please try again.');
+      notifyListeners();
+      _message = 'Error --> $e';
     }
   }
-  
+
   void refresh() {
     _fetchAllRestaurant();
   }
@@ -44,7 +53,7 @@ class RestaurantListProvider extends ChangeNotifier {
 
 class RestaurantDetailProvider extends ChangeNotifier {
   final ApiService apiService;
-  
+
   RestaurantDetailProvider({required this.apiService});
 
   ResultState<RestaurantDetailResponse> _state = Initial();
@@ -53,35 +62,39 @@ class RestaurantDetailProvider extends ChangeNotifier {
   String _message = '';
   String get message => _message;
 
-  Future<dynamic> fetchDetail(String id) async {
+  Future<void> fetchDetail(String id) async {
     try {
       _state = Loading();
       notifyListeners();
       final restaurant = await apiService.getRestaurantDetail(id);
       if (restaurant.error) {
-         _state = ErrorState(restaurant.message);
-         notifyListeners();
-         return _message = restaurant.message;
+        _state = ErrorState("Gagal memuat detail restoran.");
       } else {
+        restaurant.restaurant.customerReviews.sort((a, b) {
+          final dateA = DateHelper.parseIndonesianDate(a.date);
+          final dateB = DateHelper.parseIndonesianDate(b.date);
+          return dateB.compareTo(dateA);
+        });
         _state = HasData(restaurant);
-        notifyListeners();
-        return _message = 'Data Loaded';
       }
-    } catch (e) {
-      _state = ErrorState('Error --> $e');
       notifyListeners();
-      return _message = 'Error --> $e';
+    } catch (e) {
+      _state = ErrorState(
+        "Yah, koneksinya terputus. Coba cek internetmu dan refresh lagi ya!",
+      );
+      notifyListeners();
     }
   }
-  
+
   Future<void> postReview(String id, String name, String review) async {
-      try {
-          await apiService.postReview(id, name, review);
-          fetchDetail(id);
-      } catch (e) {
-             print("Error posting review: $e");
-             // Consider handling error state here if UI needs it
-      }
+    try {
+      await apiService.postReview(id, name, review);
+      fetchDetail(id);
+    } catch (e) {
+      _message = "Gagal mengirim ulasan. Silakan coba lagi.";
+      notifyListeners();
+      throw Exception(_message);
+    }
   }
 }
 
@@ -96,30 +109,36 @@ class RestaurantSearchProvider extends ChangeNotifier {
   String _message = '';
   String get message => _message;
 
-  Future<dynamic> searchRestaurant(String query) async {
+  Future<void> searchRestaurant(String query) async {
     if (query.isEmpty) {
-        _state = Initial();
-        notifyListeners();
-        return;
+      _state = Initial();
+      notifyListeners();
+      return;
     }
-    
+
     try {
       _state = Loading();
       notifyListeners();
       final result = await apiService.searchRestaurant(query);
       if (result.restaurants.isEmpty) {
-        _state = ErrorState('No Restaurant Found');
+        _state = NoData('No Restaurant Found');
         notifyListeners();
-        return _message = 'No Data';
+        _message = 'No Data';
       } else {
         _state = HasData(result);
         notifyListeners();
-        return _message = 'Data Loaded';
+        _message = 'Data Loaded';
       }
-    } catch (e) {
-      _state = ErrorState('Error --> $e');
+    } on SocketException {
+      _state = ErrorState(
+        'No Internet Connection. Please check your connection.',
+      );
       notifyListeners();
-      return _message = 'Error --> $e';
+      _message = 'No Internet Connection';
+    } catch (e) {
+      _state = ErrorState('Failed to search. Please try again.');
+      notifyListeners();
+      _message = 'Error --> $e';
     }
   }
 }

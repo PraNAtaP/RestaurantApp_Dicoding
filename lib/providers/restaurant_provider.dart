@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/api/api_service.dart';
@@ -33,14 +32,10 @@ class RestaurantListProvider extends ChangeNotifier {
         notifyListeners();
         _message = 'Data Loaded';
       }
-    } on SocketException {
+    } catch (e) {
       _state = ErrorState(
         'No Internet Connection. Please check your connection.',
       );
-      notifyListeners();
-      _message = 'No Internet Connection';
-    } catch (e) {
-      _state = ErrorState('Failed to load data. Please try again.');
       notifyListeners();
       _message = 'Error --> $e';
     }
@@ -129,14 +124,10 @@ class RestaurantSearchProvider extends ChangeNotifier {
         notifyListeners();
         _message = 'Data Loaded';
       }
-    } on SocketException {
+    } catch (e) {
       _state = ErrorState(
         'No Internet Connection. Please check your connection.',
       );
-      notifyListeners();
-      _message = 'No Internet Connection';
-    } catch (e) {
-      _state = ErrorState('Failed to search. Please try again.');
       notifyListeners();
       _message = 'Error --> $e';
     }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/models/restaurant_model.dart';
 import '../../data/models/result_state.dart';
 import '../../providers/restaurant_provider.dart';
+import '../../providers/favorite_provider.dart';
 import '../widgets/menu_card.dart';
 import 'review_page.dart';
 
@@ -28,6 +29,7 @@ class _DetailPageState extends State<DetailPage> {
         context.read<RestaurantDetailProvider>().fetchDetail(
           widget.restaurant.id,
         );
+        context.read<FavoriteProvider>().checkFavorite(widget.restaurant.id);
       }
     });
   }
@@ -53,12 +55,53 @@ class _DetailPageState extends State<DetailPage> {
                 backgroundColor: Colors.black.withValues(alpha: 0.5),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Consumer<FavoriteProvider>(
+                  builder: (context, favoriteProvider, _) {
+                    return CircleAvatar(
+                      backgroundColor: Colors.black.withValues(alpha: 0.5),
+                      child: IconButton(
+                        icon: Icon(
+                          favoriteProvider.isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: favoriteProvider.isFavorite
+                              ? Colors.redAccent
+                              : Colors.white,
+                        ),
+                        onPressed: () {
+                          if (favoriteProvider.isFavorite) {
+                            favoriteProvider.removeFavorite(
+                              widget.restaurant.id,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Removed from favorites'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          } else {
+                            favoriteProvider.addFavorite(widget.restaurant);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Added to favorites'),
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: widget.restaurant.pictureId,
@@ -105,7 +148,8 @@ class _DetailPageState extends State<DetailPage> {
                             Expanded(
                               child: Text(
                                 "${detail.address}, ${detail.city}",
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style:
+                                    Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
                             const Icon(
@@ -130,9 +174,10 @@ class _DetailPageState extends State<DetailPage> {
                         const SizedBox(height: 8),
                         Text(
                           detail.description,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.5),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(height: 1.5),
                           textAlign: TextAlign.justify,
                         ),
                         const SizedBox(height: 24),
@@ -146,11 +191,11 @@ class _DetailPageState extends State<DetailPage> {
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.8,
-                              ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.8,
+                          ),
                           itemCount: detail.menus.foods.length,
                           itemBuilder: (context, index) => MenuCard(
                             menu: detail.menus.foods[index],
@@ -168,11 +213,11 @@ class _DetailPageState extends State<DetailPage> {
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                childAspectRatio: 0.8,
-                              ),
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            childAspectRatio: 0.8,
+                          ),
                           itemCount: detail.menus.drinks.length,
                           itemBuilder: (context, index) => MenuCard(
                             menu: detail.menus.drinks[index],
@@ -185,9 +230,7 @@ class _DetailPageState extends State<DetailPage> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 16),
-                        ...detail.customerReviews
-                            .take(3)
-                            .map(
+                        ...detail.customerReviews.take(3).map(
                               (review) => Card(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 child: Padding(
@@ -208,16 +251,17 @@ class _DetailPageState extends State<DetailPage> {
                                           ),
                                           Text(
                                             review.date,
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall,
                                           ),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
                                         review.review,
-                                        style: const TextStyle(height: 1.5),
+                                        style:
+                                            const TextStyle(height: 1.5),
                                       ),
                                     ],
                                   ),
@@ -226,7 +270,8 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                         if (detail.customerReviews.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 8.0),
                             child: OutlinedButton(
                               onPressed: () {
                                 Navigator.pushNamed(
@@ -236,11 +281,11 @@ class _DetailPageState extends State<DetailPage> {
                                 );
                               },
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.primary,
                                 side: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color:
+                                      Theme.of(context).colorScheme.primary,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
@@ -276,13 +321,13 @@ class _DetailPageState extends State<DetailPage> {
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.secondary,
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.onSecondary,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.secondary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onSecondary,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
                             ),
                             onPressed: () async {
                               if (_nameController.text.isNotEmpty &&
@@ -296,7 +341,8 @@ class _DetailPageState extends State<DetailPage> {
                                         _reviewController.text,
                                       );
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Ulasan berhasil dikirim!',
@@ -308,7 +354,8 @@ class _DetailPageState extends State<DetailPage> {
                                   _reviewController.clear();
                                 } catch (e) {
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Gagal mengirim ulasan. Periksa koneksi internet Anda.',

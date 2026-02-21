@@ -56,6 +56,7 @@ class HomePage extends StatelessWidget {
               },
             );
           } else if (state.state is ErrorState) {
+            final errorMessage = (state.state as ErrorState).message;
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -71,7 +72,7 @@ class HomePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      state.message,
+                      errorMessage,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(

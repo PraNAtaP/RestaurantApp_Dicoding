@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/notification_helper.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  Future<bool> _requestNotificationPermission() async {
+    final androidPlugin =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidPlugin == null) return true;
+
+    final granted = await androidPlugin.requestNotificationsPermission();
+    return granted ?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +123,25 @@ class SettingsPage extends StatelessWidget {
                   ),
                   activeThumbColor: Theme.of(context).colorScheme.primary,
                   value: provider.isDailyReminderActive,
-                  onChanged: (value) => provider.toggleDailyReminder(value),
+                  onChanged: (value) async {
+                    if (value) {
+                      final granted = await _requestNotificationPermission();
+                      if (!granted) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Izin notifikasi diperlukan untuk mengaktifkan daily reminder.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                        return;
+                      }
+                    }
+                    provider.toggleDailyReminder(value);
+                  },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),

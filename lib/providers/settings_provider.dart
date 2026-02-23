@@ -18,6 +18,19 @@ class SettingsProvider extends ChangeNotifier {
 
   ThemeMode get themeMode => _isDarkTheme ? ThemeMode.dark : ThemeMode.light;
 
+  int _tapCount = 0;
+  int get tapCount => _tapCount;
+
+  void incrementTapCount() {
+    _tapCount++;
+    notifyListeners();
+  }
+
+  void resetTapCount() {
+    _tapCount = 0;
+    notifyListeners();
+  }
+
   Future<void> toggleTheme(bool value) async {
     _isDarkTheme = value;
     await preferenceHelper.setDarkTheme(value);

@@ -7,6 +7,7 @@ import 'data/preferences/preference_helper.dart';
 import 'providers/restaurant_provider.dart';
 import 'providers/favorite_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/navigation_provider.dart';
 import 'styles/styles.dart';
 import 'ui/pages/detail_page.dart';
 import 'ui/pages/main_navigation.dart';
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => SettingsProvider(preferenceHelper: preferenceHelper),
         ),
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, _) {
@@ -71,13 +73,14 @@ class MyApp extends StatelessWidget {
             routes: {
               MainNavigation.routeName: (context) => const MainNavigation(),
               DetailPage.routeName: (context) => DetailPage(
-                restaurant: ModalRoute.of(context)?.settings.arguments
-                    as Restaurant,
+                restaurant:
+                    ModalRoute.of(context)?.settings.arguments as Restaurant,
               ),
               SearchPage.routeName: (context) => const SearchPage(),
               ReviewPage.routeName: (context) => ReviewPage(
-                restaurant: ModalRoute.of(context)?.settings.arguments
-                    as RestaurantDetail,
+                restaurant:
+                    ModalRoute.of(context)?.settings.arguments
+                        as RestaurantDetail,
               ),
             },
           );

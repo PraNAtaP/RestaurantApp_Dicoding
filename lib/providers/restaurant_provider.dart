@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../data/api/api_service.dart';
 import '../data/models/restaurant_model.dart';
@@ -8,9 +9,7 @@ import '../utils/date_helper.dart';
 class RestaurantListProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  RestaurantListProvider({required this.apiService}) {
-    _fetchAllRestaurant();
-  }
+  RestaurantListProvider({required this.apiService});
 
   ResultState<RestaurantListResponse> _state = Initial();
   ResultState<RestaurantListResponse> get state => _state;
@@ -33,9 +32,15 @@ class RestaurantListProvider extends ChangeNotifier {
         _message = 'Data Loaded';
       }
     } catch (e) {
-      _state = ErrorState(
-        'No Internet Connection. Please check your connection.',
-      );
+      if (e is SocketException) {
+        _state = ErrorState(
+          'No Internet Connection. Please check your connection.',
+        );
+      } else {
+        _state = ErrorState(
+          'System Error: Failed to load data. API might be unstable.',
+        );
+      }
       notifyListeners();
       _message = 'Error --> $e';
     }
@@ -74,9 +79,15 @@ class RestaurantDetailProvider extends ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      _state = ErrorState(
-        "Yah, koneksinya terputus. Coba cek internetmu dan refresh lagi ya!",
-      );
+      if (e is SocketException) {
+        _state = ErrorState(
+          "No Internet Connection. Please check your connection.",
+        );
+      } else {
+        _state = ErrorState(
+          "System Error: Failed to load detail. API might be unstable.",
+        );
+      }
       notifyListeners();
     }
   }
@@ -125,9 +136,15 @@ class RestaurantSearchProvider extends ChangeNotifier {
         _message = 'Data Loaded';
       }
     } catch (e) {
-      _state = ErrorState(
-        'No Internet Connection. Please check your connection.',
-      );
+      if (e is SocketException) {
+        _state = ErrorState(
+          'No Internet Connection. Please check your connection.',
+        );
+      } else {
+        _state = ErrorState(
+          'System Error: Failed to search. API might be unstable.',
+        );
+      }
       notifyListeners();
       _message = 'Error --> $e';
     }

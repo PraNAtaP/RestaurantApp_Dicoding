@@ -3,12 +3,28 @@ import 'package:provider/provider.dart';
 import '../../data/models/result_state.dart';
 import '../../providers/restaurant_provider.dart';
 import '../widgets/card_restaurant.dart';
+import '../widgets/state_info_widget.dart';
 import 'search_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   static const routeName = '/home_page';
 
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<RestaurantListProvider>().refresh();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +59,7 @@ class HomePage extends StatelessWidget {
       ),
       body: Consumer<RestaurantListProvider>(
         builder: (context, state, _) {
-          if (state.state is Loading) {
+          if (state.state is Loading || state.state is Initial) {
             return const Center(child: CircularProgressIndicator());
           } else if (state.state is HasData) {
             final data = (state.state as HasData).data;
@@ -55,58 +71,23 @@ class HomePage extends StatelessWidget {
                 return CardRestaurant(restaurant: restaurant);
               },
             );
+          } else if (state.state is NoData) {
+            return StateInfoWidget.empty(
+              message: (state.state as NoData).message,
+            );
           } else if (state.state is ErrorState) {
             final errorMessage = (state.state as ErrorState).message;
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 60,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      errorMessage,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.secondary,
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onSecondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () {
-                        Provider.of<RestaurantListProvider>(
-                          context,
-                          listen: false,
-                        ).refresh();
-                      },
-                      child: const Text('Try Again'),
-                    ),
-                  ],
-                ),
-              ),
+            return StateInfoWidget.error(
+              message: errorMessage,
+              onRetry: () {
+                Provider.of<RestaurantListProvider>(
+                  context,
+                  listen: false,
+                ).refresh();
+              },
             );
           } else {
-            return const Center(child: Text(''));
+            return const SizedBox();
           }
         },
       ),

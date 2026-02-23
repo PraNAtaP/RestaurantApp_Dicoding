@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../utils/background_service.dart';
 import '../../utils/notification_helper.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   Future<bool> _requestNotificationPermission() async {
-    final androidPlugin =
-        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+    final androidPlugin = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
 
     if (androidPlugin == null) return true;
 
@@ -22,10 +24,29 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+        title: GestureDetector(
+          onTap: () async {
+            // Access tapCount from settings provider or simply ignore the easter egg setState
+            // since this is just a local debug feature.
+            context.read<SettingsProvider>().incrementTapCount();
+            if (context.read<SettingsProvider>().tapCount >= 5) {
+              context.read<SettingsProvider>().resetTapCount();
+              await BackgroundService.testNotificationDirectly();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Debug Notification Triggered!'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            }
+          },
+          child: Text(
+            'Settings',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
       ),
@@ -62,10 +83,9 @@ class SettingsPage extends StatelessWidget {
                         ? 'Dark mode is enabled'
                         : 'Light mode is enabled',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   secondary: Icon(
@@ -111,10 +131,9 @@ class SettingsPage extends StatelessWidget {
                         ? 'Reminder at 11:00 AM daily'
                         : 'No daily reminder',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                   secondary: Icon(

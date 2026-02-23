@@ -11,13 +11,11 @@ class NotificationHelper {
   static const String _channelName = 'Restaurant Reminder';
 
   static Future<void> initNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(
-      android: androidSettings,
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
     );
-    await flutterLocalNotificationsPlugin.initialize(
-      settings: initSettings,
-    );
+    const initSettings = InitializationSettings(android: androidSettings);
+    await flutterLocalNotificationsPlugin.initialize(settings: initSettings);
   }
 
   static Future<void> showNotification({
@@ -44,7 +42,8 @@ class NotificationHelper {
   }
 
   static Future<void> showRandomRestaurantNotification(
-      List<Restaurant> restaurants) async {
+    List<Restaurant> restaurants,
+  ) async {
     if (restaurants.isEmpty) return;
     final random = Random();
     final restaurant = restaurants[random.nextInt(restaurants.length)];

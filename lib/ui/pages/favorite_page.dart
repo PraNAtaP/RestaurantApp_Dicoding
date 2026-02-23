@@ -27,9 +27,9 @@ class _FavoritePageState extends State<FavoritePage> {
       appBar: AppBar(
         title: Text(
           'Favorites',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
       body: Consumer<FavoriteProvider>(
@@ -42,30 +42,27 @@ class _FavoritePageState extends State<FavoritePage> {
                   Icon(
                     Icons.favorite_border_rounded,
                     size: 100,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'No favorites yet',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Start adding your favorite restaurants!',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

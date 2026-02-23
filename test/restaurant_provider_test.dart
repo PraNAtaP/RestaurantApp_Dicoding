@@ -19,7 +19,12 @@ void main() {
   });
 
   group('RestaurantListProvider', () {
-    test('initial state should be Initial before fetch completes', () {
+    test('initial state should be Initial', () {
+      provider = RestaurantListProvider(apiService: mockApiService);
+      expect(provider.state, isA<Initial<RestaurantListResponse>>());
+    });
+
+    test('should return Loading state when fetch data is started', () {
       when(mockApiService.getRestaurantList()).thenAnswer(
         (_) async => Future.delayed(
           const Duration(seconds: 10),
@@ -33,8 +38,9 @@ void main() {
       );
 
       provider = RestaurantListProvider(apiService: mockApiService);
+      provider.refresh();
 
-      expect(provider.state, isA<Loading>());
+      expect(provider.state, isA<Loading<RestaurantListResponse>>());
     });
 
     test('should return HasData when API call is successful', () async {
@@ -62,11 +68,12 @@ void main() {
         ],
       );
 
-      when(mockApiService.getRestaurantList()).thenAnswer(
-        (_) async => mockResponse,
-      );
+      when(
+        mockApiService.getRestaurantList(),
+      ).thenAnswer((_) async => mockResponse);
 
       provider = RestaurantListProvider(apiService: mockApiService);
+      provider.refresh();
 
       await Future.delayed(const Duration(milliseconds: 500));
 
@@ -77,11 +84,12 @@ void main() {
     });
 
     test('should return ErrorState when API throws SocketException', () async {
-      when(mockApiService.getRestaurantList()).thenThrow(
-        const SocketException('No Internet Connection'),
-      );
+      when(
+        mockApiService.getRestaurantList(),
+      ).thenThrow(const SocketException('No Internet Connection'));
 
       provider = RestaurantListProvider(apiService: mockApiService);
+      provider.refresh();
 
       await Future.delayed(const Duration(milliseconds: 500));
 
@@ -90,19 +98,22 @@ void main() {
       expect(errorState.message, contains('No Internet Connection'));
     });
 
-    test('should return ErrorState when API throws generic exception',
-        () async {
-      when(mockApiService.getRestaurantList()).thenThrow(
-        Exception('Server Error'),
-      );
+    test(
+      'should return ErrorState when API throws generic exception',
+      () async {
+        when(
+          mockApiService.getRestaurantList(),
+        ).thenThrow(Exception('Server Error'));
 
-      provider = RestaurantListProvider(apiService: mockApiService);
+        provider = RestaurantListProvider(apiService: mockApiService);
+        provider.refresh();
 
-      await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
 
-      expect(provider.state, isA<ErrorState>());
-      final errorState = provider.state as ErrorState;
-      expect(errorState.message, contains('No Internet Connection'));
-    });
+        expect(provider.state, isA<ErrorState>());
+        final errorState = provider.state as ErrorState;
+        expect(errorState.message, contains('System Error'));
+      },
+    );
   });
 }

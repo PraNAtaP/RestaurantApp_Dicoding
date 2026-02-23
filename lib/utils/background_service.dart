@@ -59,4 +59,24 @@ class BackgroundService {
     }
     return scheduledTime.difference(now);
   }
+
+  // Temporary function for testing only
+  static Future<void> testNotificationDirectly() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://restaurant-api.dicoding.dev/list'),
+      );
+      if (response.statusCode == 200) {
+        final data = RestaurantListResponse.fromJson(
+          json.decode(response.body),
+        );
+        await NotificationHelper.initNotifications();
+        await NotificationHelper.showRandomRestaurantNotification(
+          data.restaurants,
+        );
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
 }

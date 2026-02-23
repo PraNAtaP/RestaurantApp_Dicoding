@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/restaurant_model.dart';
+import '../../providers/favorite_provider.dart';
 import '../pages/detail_page.dart';
 
 class CardRestaurant extends StatelessWidget {
@@ -10,7 +12,7 @@ class CardRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(16),
@@ -37,21 +39,19 @@ class CardRestaurant extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Hero(
-                  tag: restaurant.pictureId,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: 100,
-                      height: 80,
-                      child: Image.network(
-                        "https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}",
-                        fit: BoxFit.cover,
-                        errorBuilder: (ctx, error, stackTrace) =>
-                            const Center(child: Icon(Icons.error)),
-                      ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    width: 100,
+                    height: 80,
+                    child: Image.network(
+                      "https://restaurant-api.dicoding.dev/images/medium/${restaurant.pictureId}",
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                      errorBuilder: (ctx, error, stackTrace) =>
+                          const Center(child: Icon(Icons.error)),
                     ),
                   ),
                 ),
@@ -112,6 +112,38 @@ class CardRestaurant extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                Consumer<FavoriteProvider>(
+                  builder: (context, favoriteProvider, _) {
+                    final isFav = favoriteProvider.isFavoriteById(
+                      restaurant.id,
+                    );
+                    return GestureDetector(
+                      onTap: () {
+                        favoriteProvider.toggleFavoriteFromCard(restaurant);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isFav
+                                  ? 'Removed from favorites'
+                                  : 'Added to favorites',
+                            ),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Icon(
+                          isFav
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: isFav ? Colors.redAccent : Colors.grey,
+                          size: 24,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

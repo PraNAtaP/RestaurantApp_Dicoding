@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/models/result_state.dart';
 import '../../providers/restaurant_provider.dart';
 import '../widgets/card_restaurant.dart';
+import '../widgets/state_info_widget.dart';
 
 class SearchPage extends StatelessWidget {
   static const routeName = '/search_page';
@@ -69,35 +70,17 @@ class SearchPage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 0),
                     itemCount: data.restaurants.length,
                     itemBuilder: (context, index) {
-                      var restaurant = data.restaurants[index];
+                      final restaurant = data.restaurants[index];
                       return CardRestaurant(restaurant: restaurant);
                     },
                   );
-                } else if (state.state is ErrorState) {
-                  if (state.message.isEmpty) return Container();
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 60,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          state.message,
-                          style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
+                } else if (state.state is NoData) {
+                  return StateInfoWidget.empty(
+                    message: (state.state as NoData).message,
                   );
+                } else if (state.state is ErrorState) {
+                  final errorMessage = (state.state as ErrorState).message;
+                  return StateInfoWidget.error(message: errorMessage);
                 } else {
                   return Center(
                     child: Column(

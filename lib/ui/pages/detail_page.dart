@@ -5,6 +5,7 @@ import '../../data/models/result_state.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/favorite_provider.dart';
 import '../widgets/menu_card.dart';
+import '../widgets/state_info_widget.dart';
 import 'review_page.dart';
 
 class DetailPage extends StatefulWidget {
@@ -43,263 +44,202 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final imageHeight = screenWidth * 0.65;
-
     return Scaffold(
-      body: Consumer<RestaurantDetailProvider>(
-        builder: (context, state, _) {
-          final result = state.state;
-
-          if (result is Loading) {
-            return _buildLoadingState(imageHeight);
-          } else if (result is HasData) {
-            final detail =
-                (result as HasData<RestaurantDetailResponse>).data.restaurant;
-            return _buildDetailContent(context, detail, imageHeight);
-          } else if (result is ErrorState) {
-            return _buildErrorState(
-              context,
-              (result as ErrorState).message,
-              imageHeight,
-            );
-          }
-          return const SizedBox();
-        },
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(double imageHeight) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildImageHeader(imageHeight),
-          const SizedBox(height: 60),
-          const Center(child: CircularProgressIndicator()),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 280,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.black.withValues(alpha: 0.5),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.network(
+                "https://restaurant-api.dicoding.dev/images/medium/${widget.restaurant.pictureId}",
+                fit: BoxFit.cover,
+                width: double.infinity,
+                gaplessPlayback: true,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Consumer<RestaurantDetailProvider>(
+              builder: (context, state, _) {
+                final result = state.state;
+                if (result is Loading || result is Initial) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(50.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (result is HasData) {
+                  final detail = (result as HasData<RestaurantDetailResponse>)
+                      .data
+                      .restaurant;
+                  return _buildDetailContent(context, detail);
+                } else if (result is ErrorState) {
+                  return StateInfoWidget.error(
+                    message: (result as ErrorState).message,
+                    onRetry: () {
+                      context.read<RestaurantDetailProvider>().fetchDetail(
+                        widget.restaurant.id,
+                      );
+                    },
+                  );
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorState(
-    BuildContext context,
-    String message,
-    double imageHeight,
-  ) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildImageHeader(imageHeight),
-          const SizedBox(height: 60),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Text(message, textAlign: TextAlign.center),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImageHeader(double imageHeight) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Hero(
-          tag: widget.restaurant.pictureId,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(24),
-            ),
-            child: Image.network(
-              "https://restaurant-api.dicoding.dev/images/medium/${widget.restaurant.pictureId}",
-              height: imageHeight,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Positioned(
-          top: MediaQuery.of(context).padding.top + 8,
-          left: 16,
-          child: CircleAvatar(
-            backgroundColor: Colors.black.withValues(alpha: 0.5),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailContent(
-    BuildContext context,
-    RestaurantDetail detail,
-    double imageHeight,
-  ) {
-    return SingleChildScrollView(
+  Widget _buildDetailContent(BuildContext context, RestaurantDetail detail) {
+    return Transform.translate(
+      offset: const Offset(0, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Column(
-                children: [
-                  _buildImageHeader(imageHeight),
-                  const SizedBox(height: 28),
-                ],
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
               ),
-              Positioned(
-                top: imageHeight - 28,
-                left: 0,
-                right: 0,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 0),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(28),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        detail.name,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineMedium?.copyWith(fontSize: 26),
+                      ),
                     ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              detail.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(fontSize: 26),
-                            ),
+                    const SizedBox(width: 12),
+                    Consumer<FavoriteProvider>(
+                      builder: (context, favoriteProvider, _) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Consumer<FavoriteProvider>(
-                            builder: (context, favoriteProvider, _) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context)
-                                      .scaffoldBackgroundColor,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.15),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: IconButton(
-                                  icon: Icon(
-                                    favoriteProvider.isFavorite
-                                        ? Icons.favorite_rounded
-                                        : Icons.favorite_border_rounded,
-                                    color: favoriteProvider.isFavorite
-                                        ? Colors.redAccent
-                                        : Colors.grey,
-                                    size: 28,
+                          child: IconButton(
+                            icon: Icon(
+                              favoriteProvider.isFavorite
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              color: favoriteProvider.isFavorite
+                                  ? Colors.redAccent
+                                  : Colors.grey,
+                              size: 28,
+                            ),
+                            onPressed: () {
+                              if (favoriteProvider.isFavorite) {
+                                favoriteProvider.removeFavorite(
+                                  widget.restaurant.id,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Removed from favorites'),
+                                    duration: Duration(seconds: 1),
                                   ),
-                                  onPressed: () {
-                                    if (favoriteProvider.isFavorite) {
-                                      favoriteProvider.removeFavorite(
-                                        widget.restaurant.id,
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content:
-                                              Text('Removed from favorites'),
-                                          duration: Duration(seconds: 1),
-                                        ),
-                                      );
-                                    } else {
-                                      favoriteProvider
-                                          .addFavorite(widget.restaurant);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Added to favorites'),
-                                          duration: Duration(seconds: 1),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              );
+                                );
+                              } else {
+                                favoriteProvider.addFavorite(widget.restaurant);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Added to favorites'),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
                             },
                           ),
-                        ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: Colors.redAccent,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        "${detail.address}, ${detail.city}",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.location_on,
-                            color: Colors.redAccent,
+                            Icons.star_rounded,
+                            color: Colors.amber,
                             size: 18,
                           ),
                           const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              "${detail.address}, ${detail.city}",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.6),
-                                  ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amber,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "${detail.rating}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            "${detail.rating}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 8),
-          const Divider(indent: 24, endIndent: 24),
-          const SizedBox(height: 8),
+          const Divider(indent: 24, endIndent: 24, height: 1),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
@@ -312,20 +252,16 @@ class _DetailPageState extends State<DetailPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Text(
               detail.description,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(height: 1.5),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(height: 1.5),
               textAlign: TextAlign.justify,
             ),
           ),
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Text(
-              "Menu",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            child: Text("Menu", style: Theme.of(context).textTheme.titleLarge),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -333,8 +269,7 @@ class _DetailPageState extends State<DetailPage> {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount:
-                  detail.menus.foods.length + detail.menus.drinks.length,
+              itemCount: detail.menus.foods.length + detail.menus.drinks.length,
               itemBuilder: (context, index) {
                 final isFood = index < detail.menus.foods.length;
                 final menu = isFood
@@ -360,7 +295,9 @@ class _DetailPageState extends State<DetailPage> {
             ),
           ),
           const SizedBox(height: 16),
-          ...detail.customerReviews.take(3).map(
+          ...detail.customerReviews
+              .take(3)
+              .map(
                 (review) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Card(
@@ -373,12 +310,16 @@ class _DetailPageState extends State<DetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                review.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
+                              Flexible(
+                                child: Text(
+                                  review.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Text(
                                 review.date,
                                 style: Theme.of(context).textTheme.bodySmall,
@@ -471,13 +412,11 @@ class _DetailPageState extends State<DetailPage> {
                   if (_nameController.text.isNotEmpty &&
                       _reviewController.text.isNotEmpty) {
                     try {
-                      await context
-                          .read<RestaurantDetailProvider>()
-                          .postReview(
-                            detail.id,
-                            _nameController.text,
-                            _reviewController.text,
-                          );
+                      await context.read<RestaurantDetailProvider>().postReview(
+                        detail.id,
+                        _nameController.text,
+                        _reviewController.text,
+                      );
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
